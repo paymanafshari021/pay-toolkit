@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayToolkit | Pro Edition</title>
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            --bg-color: #f8fafc;
+            --grid-color: rgba(0, 0, 0, 0.05);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --accent: #6366f1;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --input-bg: #ffffff;
+            --code-bg: #0f172a;
+            --code-text: #38bdf8;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0b0e14;
+                --grid-color: rgba(255, 255, 255, 0.03);
+                --card-bg: rgba(23, 27, 34, 0.9);
+                --accent: #818cf8;
+                --text-main: #f1f5f9;
+                --text-sub: #94a3b8;
+                --border-color: #334155;
+                --input-bg: #1e293b;
+                --code-bg: #000000;
+                --code-text: #4ade80;
+                --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        /* --- GLOBAL STYLES --- */
+        body { 
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; 
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--grid-color) 2px, transparent 2px);
+            background-size: 30px 30px;
+            color: var(--text-main);
+            padding: 40px 20px;
+            margin: 0;
+            transition: background 0.3s ease;
+        }
+
+        header { 
+            max-width: 1200px; 
+            margin: 0 auto 40px auto; 
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .header-left .header-tag { text-transform: uppercase; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 8px; }
+        .header-left h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.05em; margin: 0; background: linear-gradient(90deg, #d9534f, #9b59b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* --- LAYOUT GRID --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px; max-width: 1200px; margin: auto; }
+        .card { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color); border-radius: 16px; padding: 28px; box-shadow: var(--shadow); transition: transform 0.2s ease; }
+        .card:hover { transform: translateY(-4px); }
+        
+        .card.sniffer { grid-column: 1 / -1; border-top: 5px solid #9b59b6; }
+        .card.flow { grid-column: 1 / -1; border-top: 5px solid #e74c3c; }
+        .card.vpn { border-top: 5px solid #2ecc71; }
+        .card.ping { border-top: 5px solid #3498db; }
+        .card.trace { border-top: 5px solid #f39c12; }
+
+        h2 { margin: 0 0 25px 0; font-size: 1.2rem; display: flex; align-items: center; font-weight: 700; }
+        h2::before { content: ''; width: 8px; height: 8px; border-radius: 50%; margin-right: 12px; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+        /* --- INPUT GROUPS --- */
+        .input-group { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+        
+        /* FIX: Ensure Filter Rows never wrap */
+        .filter-row { flex-wrap: nowrap !important; gap: 12px !important; align-items: flex-end; }
+        
+        .field { display: flex; flex-direction: column; flex: 1; min-width: 140px; }
+        .filter-row .field { min-width: 0; } /* Allows shrinking in row */
+
+        .sniffer-interface { flex: 2; }
+        .sniffer-verb { flex: 3; }
+        .sniffer-small { flex: 1; min-width: 80px; }
+
+        label { font-size: 10px; font-weight: 800; margin-bottom: 8px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            background: var(--input-bg);
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            color: var(--text-main);
+            font-size: 14px; 
+            box-sizing: border-box;
+        }
+
+        input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+
+        /* --- CODE BLOCKS --- */
+        .code-block { 
+            background: var(--code-bg); 
+            color: var(--code-text); 
+            padding: 20px; 
+            border-radius: 12px; 
+            font-family: 'Consolas', 'Monaco', monospace; 
+            font-size: 14px; 
+            margin-top: 20px;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid var(--border-color);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            min-height: 40px;
+        }
+
+        .code-block::after { content: 'COPY'; position: absolute; top: 10px; right: 15px; font-size: 9px; font-weight: 800; color: var(--text-sub); opacity: 0.5; }
+        .card.routing { border-top: 5px solid #f1c40f; }
+        .copy-flash { animation: flash-green 0.6s ease; }
+        @keyframes flash-green {
+            0% { box-shadow: 0 0 0 0px rgba(74, 222, 128, 0.6); background: rgba(74, 222, 128, 0.2); }
+            100% { box-shadow: 0 0 0 20px rgba(74, 222, 128, 0); }
+        }
+
+        /* --- BUTTONS --- */
+        .add-btn { background: var(--accent); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; margin: 10px 0; transition: opacity 0.2s; }
+        .remove-btn { background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; height: 42px; width: 42px; min-width: 42px; flex-shrink: 0; }
+        .clear-btn { background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 12px; transition: all 0.2s; }
+        .clear-btn:hover { background: #ef4444; color: white; }
+
+        hr { border: 0; border-top: 1px solid var(--border-color); margin: 25px 0; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <div class="header-tag">Network Operations</div>
+        <h1>FortiGate Toolkit</h1>
+    </div>
+    <button class="clear-btn" onclick="clearAllInputs()">CLEAR ALL INPUTS</button>
+</header>
+
+<div class="grid">
+    <div class="card sniffer">
+        <h2>Dynamic Packet Sniffer</h2>
+        <div class="input-group">
+            <div class="field sniffer-interface">
+                <label>Interface</label>
+                <input type="text" id="snInt" value="any" oninput="genAll()">
+            </div>
+            <div class="field sniffer-verb">
+                <label>Verbose Level</label>
+                <select id="snVerb" onchange="genAll()">
+                    <option value="4" selected>4: Interface + Headers</option>
+                    <option value="1">1: Headers only</option>
+                    <option value="3">3: IPv4 + Payload</option>
+                    <option value="6">6: Interface + Payload</option>
+                </select>
+            </div>
+            <div class="field sniffer-small">
+                <label>Count</label>
+                <input type="number" id="snCount" value="0" oninput="genAll()">
+            </div>
+            <div class="field sniffer-small">
+                <label>TS Format</label>
+                <select id="snTS" onchange="genAll()">
+                    <option value="l" selected>Local</option>
+                    <option value="a">Absolute</option>
+                </select>
+            </div>
+        </div>
+        <hr>
+        <div id="filter-container"></div>
+        <button class="add-btn" onclick="addFilterRow()">+ Add Filter Condition</button>
+        <div class="code-block" id="snOut" onclick="copy(this)"></div>
+    </div>
+
+    <div class="card flow">
+        <h2>Debug Flow (Packet Tracing)</h2>
+        <div class="input-group">
+            <div class="field">
+                <label>Target IP Address</label>
+                <input type="text" id="flowAddr" placeholder="source_ip" oninput="genAll()">
+            </div>
+            <div class="field">
+                <label>Protocol</label>
+                <select id="flowProto" onchange="toggleFlowPort(); genAll();">
+                    <option value="6" selected>TCP (6)</option>
+                    <option value="17">UDP (17)</option>
+                    <option value="1">ICMP (1)</option>
+                </select>
+            </div>
+            <div class="field" id="flowPortField">
+                <label>Port</label>
+                <input type="text" id="flowPort" placeholder="443" oninput="genAll()">
+            </div>
+            <div class="field">
+                <label>Trace Count</label>
+                <input type="number" id="flowTrace" value="10" oninput="genAll()">
+            </div>
+        </div>
+        <div class="code-block" id="flowOut" onclick="copy(this)"></div>
+    </div>
+
+    <div class="card vpn">
+        <h2>VPN IKE Debug</h2>
+        <div class="field">
+            <label>Remote Gateway IP</label>
+            <input type="text" id="vpnIp" placeholder="destination_ip" oninput="genAll()">
+        </div>
+        <div class="code-block" id="vpnOut" onclick="copy(this)"></div>
+    </div>
+
+    <div class="card ping">
+        <h2>Ping Test</h2>
+        <div class="input-group">
+            <div class="field">
+                <label>Source IP</label>
+                <input type="text" id="pSrc" placeholder="source_ip" oninput="genAll()">
+            </div>
+            <div class="field">
+                <label>Destination IP</label>
+                <input type="text" id="pDst" placeholder="destination_ip" oninput="genAll()">
+            </div>
+        </div>
+        <div class="code-block" id="pOut" onclick="copy(this)"></div>
+    </div>
+
+    <div class="card trace">
+        <h2>Traceroute</h2>
+        <div class="input-group">
+            <div class="field">
+                <label>Source IP</label>
+                <input type="text" id="tSrc" placeholder="source_ip" oninput="genAll()">
+            </div>
+            <div class="field">
+                <label>Destination IP</label>
+                <input type="text" id="tDst" placeholder="destination_ip" oninput="genAll()">
+            </div>
+        </div>
+        <div class="code-block" id="tOut" onclick="copy(this)"></div>
+    </div>
+    <div class="card routing">
+        <h2>Routing & Gateway Lookup</h2>
+        <div class="field">
+            <label>Destination IP</label>
+            <input type="text" id="rtIp" placeholder="destination_ip" oninput="genAll()">
+        </div>
+        <div class="code-block" id="rtOut" onclick="copy(this)"></div>
+    </div>
+</div>
+
+<script>
+    let rowCount = 0;
+
+function addFilterRow() {
+    rowCount++;
+    const container = document.getElementById('filter-container');
+    const row = document.createElement('div');
+    row.className = 'input-group filter-row';
+    row.id = `row-${rowCount}`;
+    row.innerHTML = `
+        <div class="field" style="flex: 0 0 70px; ${rowCount === 1 ? 'display:none' : ''}">
+            <label>Logic</label>
+            <select class="fLogic" onchange="genAll()">
+                <option value="and">AND</option>
+                <option value="or">OR</option>
+            </select>
+        </div>
+
+        <div class="field" style="flex: 1">
+            <label>Type</label>
+            <select class="fType" onchange="toggleRowFields('${row.id}'); genAll();">
+                <option value="host">Host IP</option>
+                <option value="net">Network (CIDR)</option>
+                <option value="port" selected>Port</option>
+                <option value="src host">Src Host</option>
+                <option value="dst host">Dst Host</option>
+                <option value="icmp">ICMP</option>
+                <option value="arp">ARP</option>
+            </select>
+        </div>
+
+        <div class="field fProtoField" style="flex: 1; display: flex;">
+            <label>Protocol</label>
+            <select class="fProto" onchange="genAll()">
+                <option value="">any</option>
+                <option value="tcp">tcp</option>
+                <option value="udp">udp</option>
+            </select>
+        </div>
+
+        <div class="field" style="flex: 2">
+            <label>Value</label>
+            <input type="text" class="fVal" placeholder="Value..." oninput="genAll()">
+        </div>
+
+        <button class="remove-btn" onclick="removeRow('${row.id}')">×</button>
+    `;
+    container.appendChild(row);
+    toggleRowFields(row.id); // Set initial visibility
+    genAll();
+}
+function toggleRowFields(rowId) {
+    const row = document.getElementById(rowId);
+    const type = row.querySelector('.fType').value;
+    const protoField = row.querySelector('.fProtoField');
+    const valInput = row.querySelector('.fVal');
+    
+    // Show protocol dropdown only for "port" type
+    protoField.style.display = (type === 'port') ? 'flex' : 'none';
+    
+    // Hide value input for ICMP/ARP
+    valInput.parentElement.style.display = (['icmp', 'arp'].includes(type)) ? 'none' : 'flex';
+}
+    function removeRow(id) {
+        document.getElementById(id).remove();
+        genAll();
+    }
+
+    function toggleFlowPort() {
+        const proto = document.getElementById('flowProto').value;
+        const portField = document.getElementById('flowPortField');
+        portField.style.display = (proto === "1") ? "none" : "flex";
+    }
+
+    function clearAllInputs() {
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            if (input.id === 'snInt') input.value = 'any';
+            else if (input.id === 'snCount') input.value = '0';
+            else if (input.id === 'flowTrace') input.value = '10';
+            else input.value = '';
+        });
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => select.selectedIndex = 0);
+        document.getElementById('filter-container').innerHTML = '';
+        rowCount = 0;
+        addFilterRow();
+        toggleFlowPort();
+        genAll();
+    }
+
+    function genAll() {
+        // Sniffer logic
+        const sInt = document.getElementById('snInt').value || "any";
+        const sVerb = document.getElementById('snVerb').value;
+        const sCount = document.getElementById('snCount').value || "0";
+        const sTS = document.getElementById('snTS').value;
+        const rows = document.querySelectorAll('.filter-row');
+        let filterParts = [];
+        rows.forEach((row) => {
+        const logic = row.querySelector('.fLogic').value;
+        const type = row.querySelector('.fType').value;
+        const proto = row.querySelector('.fProto').value;
+        const val = row.querySelector('.fVal').value;
+            let segment = "";
+            if (["icmp", "arp"].includes(type)) segment = type;
+            else if (val) {
+            if (type === "port" && proto !== "") {
+                // This combines protocol + port (e.g., "tcp port 80")
+                segment = `${proto} ${type} ${val}`;
+            } else {
+                segment = `${type} ${val}`;
+            }
+        }
+            if (segment) {
+                if (filterParts.length === 0) filterParts.push(segment);
+                else filterParts.push(`${logic} ${segment}`);
+            }
+        });
+        let fString = filterParts.length > 0 ? ` '${filterParts.join(' ')}'` : "";
+        document.getElementById('snOut').innerText = `diag sniffer packet ${sInt}${fString} ${sVerb} ${sCount} ${sTS}`;
+
+        // Flow logic
+        const fAddr = document.getElementById('flowAddr').value || "<ip_address>";
+        const fProto = document.getElementById('flowProto').value;
+        const fPort = document.getElementById('flowPort').value || "<port>";
+        const fCount = document.getElementById('flowTrace').value || "10";
+        let portCmd = (fProto === "1") ? "" : `diag debug flow filter port ${fPort}\n`;
+        document.getElementById('flowOut').innerText = `diag debug disable\ndiag debug flow trace stop\ndiag debug flow filter clear\ndiag debug reset\n\ndiag debug flow filter addr ${fAddr}\ndiag debug flow filter proto ${fProto}\n${portCmd}diag debug flow show function-name enable\ndiag debug flow show iprope enable\ndiag debug console timestamp enable\ndiag debug flow trace start ${fCount}\n\ndiag debug enable`;
+
+        // VPN logic
+        const vpnIp = document.getElementById('vpnIp').value || "<destination_ip>";
+        document.getElementById('vpnOut').innerText = `diagnose debug disable\ndiagnose vpn ike log-filter clear\ndiagnose vpn ike log-filter rem-addr4 ${vpnIp}\ndiagnose debug application ike -1\ndiagnose debug enable`;
+
+        // Static
+        const rtIp = document.getElementById('rtIp').value || "<destination_ip>";
+        document.getElementById('rtOut').innerText = `get router info routing-table details ${rtIp}`;
+
+        // Tools logic
+        document.getElementById('pOut').innerText = `execute ping-options source ${document.getElementById('pSrc').value || '<source_ip>'}\nexecute ping ${document.getElementById('pDst').value || '<destination_ip>'}`;
+        document.getElementById('tOut').innerText = `execute traceroute-options source ${document.getElementById('tSrc').value || '<source_ip>'}\nexecute traceroute ${document.getElementById('tDst').value || '<destination_ip>'}`;
+    }
+
+    function copy(el) {
+        if (!el.innerText || el.innerText.trim() === "") return;
+        navigator.clipboard.writeText(el.innerText);
+        el.classList.remove('copy-flash');
+        void el.offsetWidth; 
+        el.classList.add('copy-flash');
+    }
+
+    addFilterRow();
+</script>
+</body>
+</html>
