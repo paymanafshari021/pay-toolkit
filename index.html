@@ -386,7 +386,7 @@ function toggleRowFields(rowId) {
 
         // VPN logic
         const vpnIp = document.getElementById('vpnIp').value || "<destination_ip>";
-        document.getElementById('vpnOut').innerText = `diagnose debug disable\ndiagnose vpn ike log-filter clear\ndiagnose vpn ike log-filter rem-addr4 ${vpnIp}\ndiagnose debug application ike -1\ndiagnose debug enable`;
+        document.getElementById('vpnOut').innerText = `diagnose debug disable\ndiagnose vpn ike log filter clear\ndiagnose vpn ike log filter rem-addr4 ${vpnIp}\ndiagnose debug application ike -1\ndiagnose debug enable`;
 
         // Static
         const rtIp = document.getElementById('rtIp').value || "<destination_ip>";
