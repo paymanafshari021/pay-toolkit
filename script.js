@@ -1,18 +1,17 @@
 let rowCount = 0;
 
 /**
- * Add a new filter row to the sniffer card with smooth animation
+ * Add a new filter row to the packet sniffer
  */
 function addFilterRow() {
     rowCount++;
     const container = document.getElementById('filter-container');
     const row = document.createElement('div');
-    row.className = 'input-group filter-row';
+    row.className = 'filter-row';
     row.id = `row-${rowCount}`;
-    row.style.animation = 'slideInRow 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
     
     row.innerHTML = `
-        <div class="field" style="flex: 0 0 70px; ${rowCount === 1 ? 'display:none' : ''}">
+        <div class="field">
             <label>Logic</label>
             <select class="fLogic" onchange="genAll()">
                 <option value="and">AND</option>
@@ -20,7 +19,7 @@ function addFilterRow() {
             </select>
         </div>
 
-        <div class="field" style="flex: 1">
+        <div class="field">
             <label>Type</label>
             <select class="fType" onchange="toggleRowFields('${row.id}'); genAll();">
                 <option value="host">Host IP</option>
@@ -33,7 +32,7 @@ function addFilterRow() {
             </select>
         </div>
 
-        <div class="field fProtoField" style="flex: 1; display: flex;">
+        <div class="field fProtoField">
             <label>Protocol</label>
             <select class="fProto" onchange="genAll()">
                 <option value="">any</option>
@@ -42,9 +41,9 @@ function addFilterRow() {
             </select>
         </div>
 
-        <div class="field" style="flex: 2">
+        <div class="field">
             <label>Value</label>
-            <input type="text" class="fVal" placeholder="Value..." oninput="genAll()">
+            <input type="text" class="fVal" placeholder="Filter value..." oninput="genAll()">
         </div>
 
         <button class="remove-btn" onclick="removeRow('${row.id}')" title="Remove filter">×</button>
@@ -56,26 +55,7 @@ function addFilterRow() {
 }
 
 /**
- * Animation for row insertion
- */
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRow {
-        from {
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-`;
-document.head.appendChild(style);
-
-/**
- * Toggle visibility of protocol field and value input based on filter type
- * @param {string} rowId - The ID of the filter row
+ * Toggle visibility of protocol field based on filter type
  */
 function toggleRowFields(rowId) {
     const row = document.getElementById(rowId);
@@ -83,36 +63,23 @@ function toggleRowFields(rowId) {
     const protoField = row.querySelector('.fProtoField');
     const valInput = row.querySelector('.fVal');
     
+    // Show protocol dropdown only for "port" type
     protoField.style.display = (type === 'port') ? 'flex' : 'none';
+    
+    // Hide value input for ICMP/ARP
     valInput.parentElement.style.display = (['icmp', 'arp'].includes(type)) ? 'none' : 'flex';
 }
 
 /**
- * Remove a filter row with smooth animation
- * @param {string} id - The ID of the row to remove
+ * Remove a filter row
  */
 function removeRow(id) {
-    const element = document.getElementById(id);
-    element.style.animation = 'slideOutRow 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
-    setTimeout(() => {
-        element.remove();
-        genAll();
-    }, 400);
+    document.getElementById(id).remove();
+    genAll();
 }
 
-const slideOutStyle = document.createElement('style');
-slideOutStyle.textContent = `
-    @keyframes slideOutRow {
-        to {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-    }
-`;
-document.head.appendChild(slideOutStyle);
-
 /**
- * Toggle port field visibility based on protocol selection in Debug Flow
+ * Toggle port field visibility based on protocol
  */
 function toggleFlowPort() {
     const proto = document.getElementById('flowProto').value;
@@ -121,11 +88,13 @@ function toggleFlowPort() {
 }
 
 /**
- * Clear all input fields and reset to defaults with confirmation
+ * Clear all inputs and reset to defaults
  */
 function clearAllInputs() {
-    if (!confirm('Clear all inputs? This action cannot be undone.')) return;
-    
+    if (!confirm('Reset all inputs to default values?')) {
+        return;
+    }
+
     const inputs = document.querySelectorAll('input');
     inputs.forEach(input => {
         if (input.id === 'snInt') input.value = 'any';
@@ -145,7 +114,7 @@ function clearAllInputs() {
 }
 
 /**
- * Generate all command outputs based on current input values
+ * Generate all command outputs
  */
 function genAll() {
     genSniffer();
@@ -197,7 +166,7 @@ function genSniffer() {
 }
 
 /**
- * Generate Debug Flow (Packet Tracing) command
+ * Generate Debug Flow command
  */
 function genFlow() {
     const fAddr = document.getElementById('flowAddr').value || "<ip_address>";
@@ -260,39 +229,42 @@ function genTools() {
 }
 
 /**
- * Copy code block text to clipboard with visual feedback
- * @param {HTMLElement} el - The code block element to copy from
+ * Copy code block to clipboard
  */
 function copy(el) {
-    if (!el.innerText || el.innerText.trim() === "") return;
+    if (!el.innerText || el.innerText.trim() === "") {
+        return;
+    }
     
     navigator.clipboard.writeText(el.innerText).then(() => {
+        // Visual feedback
         el.classList.remove('copy-flash');
-        void el.offsetWidth; // Trigger reflow
+        void el.offsetWidth; // Force reflow
         el.classList.add('copy-flash');
         
-        // Visual feedback - change text temporarily
-        const originalText = el.textContent;
-        el.textContent = '✓ COPIED';
-        el.style.opacity = '0.8';
+        // Optional: show feedback message
+        const originalAfter = window.getComputedStyle(el, '::after').content;
         
         setTimeout(() => {
-            el.textContent = originalText;
-            el.style.opacity = '1';
-        }, 1200);
+            el.classList.remove('copy-flash');
+        }, 500);
     }).catch(err => {
-        console.error('Failed to copy:', err);
+        console.error('Copy failed:', err);
         alert('Failed to copy to clipboard');
     });
 }
 
 /**
- * Initialize the page by adding the first filter row
+ * Initialize on page load
  */
 document.addEventListener('DOMContentLoaded', function() {
+    // Add first filter row
     addFilterRow();
     
-    // Add smooth scroll behavior to all inputs
+    // Generate initial output
+    genAll();
+    
+    // Smooth scroll to focused elements
     document.querySelectorAll('input, select').forEach(el => {
         el.addEventListener('focus', function() {
             this.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -301,17 +273,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Add keyboard shortcuts
+ * Keyboard shortcuts
  */
 document.addEventListener('keydown', function(e) {
-    // Ctrl/Cmd + K to clear all
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    // Ctrl/Cmd + R to reset all
+    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
         e.preventDefault();
         clearAllInputs();
-    }
-    // Ctrl/Cmd + L to add filter row
-    if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
-        e.preventDefault();
-        addFilterRow();
     }
 });
