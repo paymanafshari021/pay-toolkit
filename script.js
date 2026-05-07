@@ -1,7 +1,7 @@
 let rowCount = 0;
 
 /**
- * Add a new filter row to the sniffer card
+ * Add a new filter row to the sniffer card with smooth animation
  */
 function addFilterRow() {
     rowCount++;
@@ -9,6 +9,8 @@ function addFilterRow() {
     const row = document.createElement('div');
     row.className = 'input-group filter-row';
     row.id = `row-${rowCount}`;
+    row.style.animation = 'slideInRow 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    
     row.innerHTML = `
         <div class="field" style="flex: 0 0 70px; ${rowCount === 1 ? 'display:none' : ''}">
             <label>Logic</label>
@@ -45,12 +47,31 @@ function addFilterRow() {
             <input type="text" class="fVal" placeholder="Value..." oninput="genAll()">
         </div>
 
-        <button class="remove-btn" onclick="removeRow('${row.id}')">×</button>
+        <button class="remove-btn" onclick="removeRow('${row.id}')" title="Remove filter">×</button>
     `;
+    
     container.appendChild(row);
     toggleRowFields(row.id);
     genAll();
 }
+
+/**
+ * Animation for row insertion
+ */
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRow {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+`;
+document.head.appendChild(style);
 
 /**
  * Toggle visibility of protocol field and value input based on filter type
@@ -67,13 +88,28 @@ function toggleRowFields(rowId) {
 }
 
 /**
- * Remove a filter row
+ * Remove a filter row with smooth animation
  * @param {string} id - The ID of the row to remove
  */
 function removeRow(id) {
-    document.getElementById(id).remove();
-    genAll();
+    const element = document.getElementById(id);
+    element.style.animation = 'slideOutRow 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+    setTimeout(() => {
+        element.remove();
+        genAll();
+    }, 400);
 }
+
+const slideOutStyle = document.createElement('style');
+slideOutStyle.textContent = `
+    @keyframes slideOutRow {
+        to {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+    }
+`;
+document.head.appendChild(slideOutStyle);
 
 /**
  * Toggle port field visibility based on protocol selection in Debug Flow
@@ -85,9 +121,11 @@ function toggleFlowPort() {
 }
 
 /**
- * Clear all input fields and reset to defaults
+ * Clear all input fields and reset to defaults with confirmation
  */
 function clearAllInputs() {
+    if (!confirm('Clear all inputs? This action cannot be undone.')) return;
+    
     const inputs = document.querySelectorAll('input');
     inputs.forEach(input => {
         if (input.id === 'snInt') input.value = 'any';
@@ -228,10 +266,24 @@ function genTools() {
 function copy(el) {
     if (!el.innerText || el.innerText.trim() === "") return;
     
-    navigator.clipboard.writeText(el.innerText);
-    el.classList.remove('copy-flash');
-    void el.offsetWidth;
-    el.classList.add('copy-flash');
+    navigator.clipboard.writeText(el.innerText).then(() => {
+        el.classList.remove('copy-flash');
+        void el.offsetWidth; // Trigger reflow
+        el.classList.add('copy-flash');
+        
+        // Visual feedback - change text temporarily
+        const originalText = el.textContent;
+        el.textContent = '✓ COPIED';
+        el.style.opacity = '0.8';
+        
+        setTimeout(() => {
+            el.textContent = originalText;
+            el.style.opacity = '1';
+        }, 1200);
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy to clipboard');
+    });
 }
 
 /**
@@ -239,4 +291,27 @@ function copy(el) {
  */
 document.addEventListener('DOMContentLoaded', function() {
     addFilterRow();
+    
+    // Add smooth scroll behavior to all inputs
+    document.querySelectorAll('input, select').forEach(el => {
+        el.addEventListener('focus', function() {
+            this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    });
+});
+
+/**
+ * Add keyboard shortcuts
+ */
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + K to clear all
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        clearAllInputs();
+    }
+    // Ctrl/Cmd + L to add filter row
+    if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+        e.preventDefault();
+        addFilterRow();
+    }
 });
