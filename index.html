@@ -3,127 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayToolkit | Pro Edition</title>
+    <title>FortiGate Toolkit</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header>
-    <div class="header-left">
-        <div class="header-tag">Network Operations</div>
-        <h1>FortiGate Toolkit</h1>
-    </div>
-    <button class="clear-btn" onclick="clearAllInputs()">CLEAR ALL INPUTS</button>
-</header>
-
-<div class="grid">
-    <div class="card sniffer">
-        <h2>Dynamic Packet Sniffer</h2>
-        <div class="input-group">
-            <div class="field sniffer-interface">
-                <label>Interface</label>
-                <input type="text" id="snInt" value="any" oninput="genAll()">
-            </div>
-            <div class="field sniffer-verb">
-                <label>Verbose Level</label>
-                <select id="snVerb" onchange="genAll()">
-                    <option value="4" selected>4: Interface + Headers</option>
-                    <option value="1">1: Headers only</option>
-                    <option value="3">3: IPv4 + Payload</option>
-                    <option value="6">6: Interface + Payload</option>
-                </select>
-            </div>
-            <div class="field sniffer-small">
-                <label>Count</label>
-                <input type="number" id="snCount" value="0" oninput="genAll()">
-            </div>
-            <div class="field sniffer-small">
-                <label>TS Format</label>
-                <select id="snTS" onchange="genAll()">
-                    <option value="l" selected>Local</option>
-                    <option value="a">Absolute</option>
-                </select>
-            </div>
+    <div class="sidebar">
+        <div class="logo">
+            <h2>FortiGate</h2>
+            <span>Toolkit Pro</span>
         </div>
-        <div id="filter-container"></div>
-        <button class="add-btn" onclick="addFilterRow()">+ Add Filter Condition</button>
-        <div class="code-block" id="snOut" onclick="copy(this)"></div>
+        <ul class="menu">
+            <li class="active" data-tab="sniffer">Packet Sniffer</li>
+            <li data-tab="flow">Debug Flow</li>
+            <li data-tab="vpn">VPN IKE Debug</li>
+            <li data-tab="ping">Ping Test</li>
+            <li data-tab="trace">Traceroute</li>
+            <li data-tab="routing">Routing Lookup</li>
+        </ul>
     </div>
 
-    <div class="card flow">
-        <h2>Debug Flow (Packet Tracing)</h2>
-        <div class="input-group">
-            <div class="field">
-                <label>Target IP Address</label>
-                <input type="text" id="flowAddr" placeholder="source_ip" oninput="genAll()">
-            </div>
-            <div class="field">
-                <label>Protocol</label>
-                <select id="flowProto" onchange="toggleFlowPort(); genAll();">
-                    <option value="6" selected>TCP (6)</option>
-                    <option value="17">UDP (17)</option>
-                    <option value="1">ICMP (1)</option>
-                </select>
-            </div>
-            <div class="field" id="flowPortField">
-                <label>Port</label>
-                <input type="text" id="flowPort" placeholder="443" oninput="genAll()">
-            </div>
-            <div class="field">
-                <label>Trace Count</label>
-                <input type="number" id="flowTrace" value="10" oninput="genAll()">
-            </div>
-        </div>
-        <div class="code-block" id="flowOut" onclick="copy(this)"></div>
-    </div>
+    <div class="main-content">
+        <header>
+            <h1>FortiGate Command Generator</h1>
+            <button class="clear-btn" onclick="clearAllInputs()">Reset All</button>
+        </header>
 
-    <div class="card vpn">
-        <h2>VPN IKE Debug</h2>
-        <div class="field">
-            <label>Remote Gateway IP</label>
-            <input type="text" id="vpnIp" placeholder="destination_ip" oninput="genAll()">
+        <!-- Packet Sniffer -->
+        <div id="sniffer" class="tab-content active">
+            <h2>Dynamic Packet Sniffer</h2>
+            <div class="card">
+                <!-- Inputs here -->
+                <div class="input-group">
+                    <div class="field">
+                        <label>Interface</label>
+                        <input type="text" id="snInt" value="any" oninput="genAll()">
+                    </div>
+                    <div class="field">
+                        <label>Verbose Level</label>
+                        <select id="snVerb" onchange="genAll()">
+                            <option value="4" selected>4 - Interface + Headers</option>
+                            <option value="1">1 - Headers only</option>
+                            <option value="3">3 - IPv4 + Payload</option>
+                            <option value="6">6 - Full</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Count (0 = unlimited)</label>
+                        <input type="number" id="snCount" value="0" oninput="genAll()">
+                    </div>
+                    <div class="field">
+                        <label>Timestamp</label>
+                        <select id="snTS" onchange="genAll()">
+                            <option value="l" selected>Local</option>
+                            <option value="a">Absolute</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="filter-container"></div>
+                <button class="add-btn" onclick="addFilterRow()">+ Add Filter</button>
+                <div class="code-block" id="snOut" onclick="copy(this)"></div>
+            </div>
         </div>
-        <div class="code-block" id="vpnOut" onclick="copy(this)"></div>
-    </div>
 
-    <div class="card ping">
-        <h2>Ping Test</h2>
-        <div class="input-group">
-            <div class="field">
-                <label>Source IP</label>
-                <input type="text" id="pSrc" placeholder="source_ip" oninput="genAll()">
-            </div>
-            <div class="field">
-                <label>Destination IP</label>
-                <input type="text" id="pDst" placeholder="destination_ip" oninput="genAll()">
+        <!-- Debug Flow -->
+        <div id="flow" class="tab-content">
+            <h2>Debug Flow (Packet Tracing)</h2>
+            <div class="card">
+                <div class="input-group">
+                    <div class="field">
+                        <label>Target IP / Source IP</label>
+                        <input type="text" id="flowAddr" placeholder="0.0.0.0" oninput="genAll()">
+                    </div>
+                    <div class="field">
+                        <label>Protocol</label>
+                        <select id="flowProto" onchange="toggleFlowPort(); genAll();">
+                            <option value="6" selected>TCP</option>
+                            <option value="17">UDP</option>
+                            <option value="1">ICMP</option>
+                        </select>
+                    </div>
+                    <div class="field" id="flowPortField">
+                        <label>Port</label>
+                        <input type="text" id="flowPort" placeholder="443" oninput="genAll()">
+                    </div>
+                    <div class="field">
+                        <label>Trace Count</label>
+                        <input type="number" id="flowTrace" value="10" oninput="genAll()">
+                    </div>
+                </div>
+                <div class="code-block" id="flowOut" onclick="copy(this)"></div>
             </div>
         </div>
-        <div class="code-block" id="pOut" onclick="copy(this)"></div>
-    </div>
 
-    <div class="card trace">
-        <h2>Traceroute</h2>
-        <div class="input-group">
-            <div class="field">
-                <label>Source IP</label>
-                <input type="text" id="tSrc" placeholder="source_ip" oninput="genAll()">
-            </div>
-            <div class="field">
-                <label>Destination IP</label>
-                <input type="text" id="tDst" placeholder="destination_ip" oninput="genAll()">
+        <!-- VPN IKE -->
+        <div id="vpn" class="tab-content">
+            <h2>VPN IKE Debug</h2>
+            <div class="card">
+                <div class="field">
+                    <label>Remote Gateway IP</label>
+                    <input type="text" id="vpnIp" placeholder="203.0.113.1" oninput="genAll()">
+                </div>
+                <div class="code-block" id="vpnOut" onclick="copy(this)"></div>
             </div>
         </div>
-        <div class="code-block" id="tOut" onclick="copy(this)"></div>
-    </div>
 
-    <div class="card routing">
-        <h2>Routing & Gateway Lookup</h2>
-        <div class="field">
-            <label>Destination IP</label>
-            <input type="text" id="rtIp" placeholder="destination_ip" oninput="genAll()">
+        <!-- Ping -->
+        <div id="ping" class="tab-content">
+            <h2>Ping Test</h2>
+            <div class="card">
+                <div class="input-group">
+                    <div class="field">
+                        <label>Source IP</label>
+                        <input type="text" id="pSrc" placeholder="source_ip" oninput="genAll()">
+                    </div>
+                    <div class="field">
+                        <label>Destination IP</label>
+                        <input type="text" id="pDst" placeholder="destination_ip" oninput="genAll()">
+                    </div>
+                </div>
+                <div class="code-block" id="pOut" onclick="copy(this)"></div>
+            </div>
         </div>
-        <div class="code-block" id="rtOut" onclick="copy(this)"></div>
+
+        <!-- Traceroute -->
+        <div id="trace" class="tab-content">
+            <h2>Traceroute</h2>
+            <div class="card">
+                <div class="input-group">
+                    <div class="field">
+                        <label>Source IP</label>
+                        <input type="text" id="tSrc" placeholder="source_ip" oninput="genAll()">
+                    </div>
+                    <div class="field">
+                        <label>Destination IP</label>
+                        <input type="text" id="tDst" placeholder="destination_ip" oninput="genAll()">
+                    </div>
+                </div>
+                <div class="code-block" id="tOut" onclick="copy(this)"></div>
+            </div>
+        </div>
+
+        <!-- Routing -->
+        <div id="routing" class="tab-content">
+            <h2>Routing Lookup</h2>
+            <div class="card">
+                <div class="field">
+                    <label>Destination IP</label>
+                    <input type="text" id="rtIp" placeholder="8.8.8.8" oninput="genAll()">
+                </div>
+                <div class="code-block" id="rtOut" onclick="copy(this)"></div>
+            </div>
+        </div>
     </div>
-</div>
 
 <script src="script.js"></script>
 </body>
