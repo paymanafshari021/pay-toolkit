@@ -1,5 +1,64 @@
 let rowCount = 0;
 
+// THEME TOGGLE FUNCTIONALITY
+function toggleTheme() {
+    const body = document.body;
+    const themeIcon = document.getElementById('themeIcon');
+    
+    if (body.classList.contains('light-theme')) {
+        // Switch to dark theme
+        body.classList.remove('light-theme');
+        themeIcon.textContent = '🌙';
+        localStorage.setItem('theme', 'dark');
+    } else {
+        // Switch to light theme
+        body.classList.add('light-theme');
+        themeIcon.textContent = '☀️';
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+// Detect system preference and initialize theme
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const themeIcon = document.getElementById('themeIcon');
+    
+    if (savedTheme) {
+        // Use saved preference
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-theme');
+            themeIcon.textContent = '☀️';
+        } else {
+            document.body.classList.remove('light-theme');
+            themeIcon.textContent = '🌙';
+        }
+    } else if (!prefersDark) {
+        // Auto-switch to light theme if system prefers light
+        document.body.classList.add('light-theme');
+        themeIcon.textContent = '☀️';
+        localStorage.setItem('theme', 'light');
+    } else {
+        // Keep dark theme (default)
+        document.body.classList.remove('light-theme');
+        themeIcon.textContent = '🌙';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+// Listen for system theme changes
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+        if (e.matches) {
+            document.body.classList.remove('light-theme');
+            document.getElementById('themeIcon').textContent = '🌙';
+        } else {
+            document.body.classList.add('light-theme');
+            document.getElementById('themeIcon').textContent = '☀️';
+        }
+    }
+});
+
 const tabConfig = {
     sniffer: { icon: '📡', title: 'Packet Sniffer', desc: 'Capture and analyze network traffic' },
     flow: { icon: '🔍', title: 'Debug Flow', desc: 'Trace packet flow through the system' },
@@ -213,5 +272,6 @@ function copy(el) {
 }
 
 // Initialize
+initializeTheme();
 addFilterRow();
 genAll();
