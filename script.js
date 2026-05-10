@@ -1,21 +1,56 @@
 let rowCount = 0;
 
+const tabConfig = {
+    sniffer: { icon: '📡', title: 'Packet Sniffer', desc: 'Capture and analyze network traffic' },
+    flow: { icon: '🔍', title: 'Debug Flow', desc: 'Trace packet flow through the system' },
+    routing: { icon: '🛣️', title: 'Routing Lookup', desc: 'View routing table and gateway information' },
+    ping: { icon: '📍', title: 'Ping Test', desc: 'Test IP connectivity' },
+    trace: { icon: '📍📍', title: 'Traceroute', desc: 'Trace route to destination' },
+    vpn: { icon: '🔐', title: 'VPN IKE Debug', desc: 'Debug VPN IKE negotiations' }
+};
+
+function switchTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    // Remove active class from all nav items
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Show selected tab
+    document.getElementById(tabName).classList.add('active');
+
+    // Add active class to clicked nav item
+    event.target.closest('.nav-item').classList.add('active');
+
+    // Update top bar
+    const config = tabConfig[tabName];
+    document.getElementById('pageIcon').textContent = config.icon;
+    document.getElementById('pageTitle').textContent = config.title;
+    document.getElementById('pageDesc').textContent = config.desc;
+
+    // Generate output
+    genAll();
+}
+
 function addFilterRow() {
     rowCount++;
     const container = document.getElementById('filter-container');
     const row = document.createElement('div');
-    row.className = 'input-group filter-row';
+    row.className = 'filter-row';
     row.id = `row-${rowCount}`;
-    
+
     row.innerHTML = `
-        <div class="field" style="flex: 0 0 70px; ${rowCount === 1 ? 'display:none' : ''}">
-            <label>Logic</label>
+        <div class="filter-logic">
             <select class="fLogic" onchange="genAll()">
                 <option value="and">AND</option>
                 <option value="or">OR</option>
             </select>
         </div>
-        <div class="field" style="flex: 1">
+        <div class="field">
             <label>Type</label>
             <select class="fType" onchange="toggleRowFields('${row.id}'); genAll();">
                 <option value="host">Host IP</option>
@@ -27,7 +62,7 @@ function addFilterRow() {
                 <option value="arp">ARP</option>
             </select>
         </div>
-        <div class="field fProtoField" style="flex: 1; display: flex;">
+        <div class="field fProtoField">
             <label>Protocol</label>
             <select class="fProto" onchange="genAll()">
                 <option value="">any</option>
@@ -35,9 +70,9 @@ function addFilterRow() {
                 <option value="udp">udp</option>
             </select>
         </div>
-        <div class="field" style="flex: 2">
+        <div class="field">
             <label>Value</label>
-            <input type="text" class="fVal" placeholder="Value..." oninput="genAll()">
+            <input type="text" class="fVal" placeholder="e.g., 192.168.1.0/24" oninput="genAll()">
         </div>
         <button class="remove-btn" onclick="removeRow('${row.id}')">×</button>
     `;
@@ -130,8 +165,7 @@ function genAll() {
     const fCount = document.getElementById('flowTrace').value || "10";
     const portCmd = (fProto === "1") ? "" : `diag debug flow filter port ${fPort}\n`;
 
-    document.getElementById('flowOut').innerText = 
-`diag debug disable
+    document.getElementById('flowOut').innerText = `diag debug disable
 diag debug flow trace stop
 diag debug flow filter clear
 diag debug reset
@@ -147,8 +181,7 @@ diag debug enable`;
 
     // VPN
     const vpnIp = document.getElementById('vpnIp').value || "<destination_ip>";
-    document.getElementById('vpnOut').innerText = 
-`diagnose debug disable
+    document.getElementById('vpnOut').innerText = `diagnose debug disable
 diagnose vpn ike log filter clear
 diagnose vpn ike log filter rem-addr4 ${vpnIp}
 diagnose debug application ike -1
@@ -159,23 +192,26 @@ diagnose debug enable`;
     document.getElementById('rtOut').innerText = `get router info routing-table details ${rtIp}`;
 
     // Ping & Traceroute
-    document.getElementById('pOut').innerText = 
-`execute ping-options source ${document.getElementById('pSrc').value || '<source_ip>'}
+    document.getElementById('pOut').innerText = `execute ping-options source ${document.getElementById('pSrc').value || '<source_ip>'}
 execute ping ${document.getElementById('pDst').value || '<destination_ip>'}`;
 
-    document.getElementById('tOut').innerText = 
-`execute traceroute-options source ${document.getElementById('tSrc').value || '<source_ip>'}
+    document.getElementById('tOut').innerText = `execute traceroute-options source ${document.getElementById('tSrc').value || '<source_ip>'}
 execute traceroute ${document.getElementById('tDst').value || '<destination_ip>'}`;
 }
 
 function copy(el) {
     if (!el.innerText || el.innerText.trim() === "") return;
-    
+
     navigator.clipboard.writeText(el.innerText);
-    el.classList.remove('copy-flash');
+    el.classList.remove('copied');
     void el.offsetWidth;
-    el.classList.add('copy-flash');
+    el.classList.add('copied');
+
+    setTimeout(() => {
+        el.classList.remove('copied');
+    }, 600);
 }
 
 // Initialize
 addFilterRow();
+genAll();
