@@ -6,6 +6,7 @@ const tabConfig = {
   routing: { title: 'Routing Lookup', desc: 'View routing table and gateway information' },
   ping:    { title: 'Ping Test', desc: 'Test IP connectivity' },
   trace:   { title: 'Traceroute', desc: 'Trace route to destination' },
+  lacp:    { title: 'LACP Troubleshoot', desc: 'Diagnose link aggregation status and negotiation' },
   ha:      { title: 'HA Troubleshoot', desc: 'Diagnose HA cluster status, sync, and failover' },
   vpn:     { title: 'VPN IKE Debug', desc: 'Debug VPN IKE negotiations' }
 };
@@ -141,6 +142,22 @@ diag debug console timestamp enable
 diag debug flow trace start ${fCount}
 
 diag debug enable`;
+
+  const lacpIf = document.getElementById('lacpIf').value || "<interface_name>";
+  const lacpHaSlave = document.getElementById('lacpHaSlave').value;
+  const lacpModeStatic = document.getElementById('lacpModeStatic').value;
+
+  let lacpCmds = `diagnose netlink aggregate name ${lacpIf}
+diagnose sniffer packet ${lacpIf} 'ether proto 0x8809' 4 0 l`;
+
+  if (lacpHaSlave === "yes" || lacpModeStatic === "yes") {
+    lacpCmds += `\n\nconfig system interface\n    edit "${lacpIf}"`;
+    if (lacpHaSlave === "yes") lacpCmds += `\n        set lacp-ha-slave disable`;
+    if (lacpModeStatic === "yes") lacpCmds += `\n        set lacp-mode static`;
+    lacpCmds += `\n    next\nend`;
+  }
+
+  document.getElementById('lacpOut').innerText = lacpCmds;
 
   const haVcluster = document.getElementById('haVcluster').value || "0";
   const haGroup = document.getElementById('haGroup').value || "0";
