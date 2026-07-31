@@ -25,6 +25,11 @@
   </div>
 
   <div class="group">
+    <div class="group-label">High Availability</div>
+    <div class="nav-item" data-tab="ha">HA Troubleshoot</div>
+  </div>
+
+  <div class="group">
     <div class="group-label">VPN &amp; Security</div>
     <div class="nav-item" data-tab="vpn">VPN IKE Debug</div>
   </div>
@@ -141,6 +146,22 @@
       <div class="card">
         <h2>Command</h2>
         <div class="code-block" id="tOut" onclick="copy(this)"></div>
+      </div>
+    </div>
+
+    <!-- HA -->
+    <div id="ha" class="tab">
+      <div class="card">
+        <h2>Cluster parameters</h2>
+        <div class="grid">
+          <div class="field"><label>VCluster ID</label><input id="haVcluster" value="0" oninput="genAll()"></div>
+          <div class="field"><label>HA group ID</label><input id="haGroup" value="0" oninput="genAll()"></div>
+          <div class="field"><label>Unit ID to manage</label><input id="haUnit" placeholder="1" oninput="genAll()"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Commands</h2>
+        <div class="code-block" id="haOut" onclick="copy(this)"></div>
       </div>
     </div>
 
