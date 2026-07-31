@@ -25,6 +25,11 @@
   </div>
 
   <div class="group">
+    <div class="group-label">Link Aggregation</div>
+    <div class="nav-item" data-tab="lacp">LACP Troubleshoot</div>
+  </div>
+
+  <div class="group">
     <div class="group-label">High Availability</div>
     <div class="nav-item" data-tab="ha">HA Troubleshoot</div>
   </div>
@@ -146,6 +151,62 @@
       <div class="card">
         <h2>Command</h2>
         <div class="code-block" id="tOut" onclick="copy(this)"></div>
+      </div>
+    </div>
+
+    <!-- LACP -->
+    <div id="lacp" class="tab">
+      <div class="card">
+        <h2>Aggregate interface</h2>
+        <div class="grid">
+          <div class="field"><label>Interface name</label><input id="lacpIf" placeholder="test_agg1" oninput="genAll()"></div>
+          <div class="field"><label>Disable lacp-ha-slave</label>
+            <select id="lacpHaSlave" onchange="genAll()">
+              <option value="no" selected>No change</option>
+              <option value="yes">Disable</option>
+            </select>
+          </div>
+          <div class="field"><label>Force lacp-mode static</label>
+            <select id="lacpModeStatic" onchange="genAll()">
+              <option value="no" selected>No change</option>
+              <option value="yes">Set static</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Commands</h2>
+        <div class="code-block" id="lacpOut" onclick="copy(this)"></div>
+      </div>
+
+      <div class="card">
+        <h2>LACP flag reference</h2>
+        <p class="ref-note">Flags read left to right: <code>(A|P)(S|F)(A|I)(I|O)(E|D)(E|D)</code></p>
+        <table class="ref-table">
+          <tbody>
+            <tr><td>1</td><td>LACP mode</td><td>A = Active</td><td>P = Passive</td></tr>
+            <tr><td>2</td><td>LACP speed</td><td>S = Slow</td><td>F = Fast</td></tr>
+            <tr><td>3</td><td>Aggregation</td><td>A = Aggregatable</td><td>I = Individual</td></tr>
+            <tr><td>4</td><td>Sync</td><td>I = In sync</td><td>O = Out of sync</td></tr>
+            <tr><td>5</td><td>Frame collection</td><td>E = Enabled</td><td>D = Disabled</td></tr>
+            <tr><td>6</td><td>Frame distribution</td><td>E = Enabled</td><td>D = Disabled</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Healthy vs. problem states</h2>
+        <table class="ref-table">
+          <thead>
+            <tr><th>State</th><th>Healthy</th><th>Problem</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>LACP state</td><td>established</td><td>negotiating — usually a partner config mismatch</td></tr>
+            <tr><td>MUX state</td><td>COLLECTING_DISTRIBUTING</td><td>WAITING — port isn't passing traffic yet</td></tr>
+          </tbody>
+        </table>
+        <p class="ref-note">If a LAG is unexpectedly down, check <code>min-links</code> against the actual number of active members before assuming a physical link problem.</p>
       </div>
     </div>
 
