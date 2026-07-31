@@ -6,6 +6,7 @@ const tabConfig = {
   routing: { title: 'Routing Lookup', desc: 'View routing table and gateway information' },
   ping:    { title: 'Ping Test', desc: 'Test IP connectivity' },
   trace:   { title: 'Traceroute', desc: 'Trace route to destination' },
+  ha:      { title: 'HA Troubleshoot', desc: 'Diagnose HA cluster status, sync, and failover' },
   vpn:     { title: 'VPN IKE Debug', desc: 'Debug VPN IKE negotiations' }
 };
 
@@ -140,6 +141,20 @@ diag debug console timestamp enable
 diag debug flow trace start ${fCount}
 
 diag debug enable`;
+
+  const haVcluster = document.getElementById('haVcluster').value || "0";
+  const haGroup = document.getElementById('haGroup').value || "0";
+  const haUnit = document.getElementById('haUnit').value;
+  const haManageCmd = haUnit ? `execute ha manage ${haUnit}\n` : "";
+
+  document.getElementById('haOut').innerText = `get system ha status
+get system ha
+diagnose sys ha status
+diagnose sys ha checksum cluster
+diagnose sys ha checksum recalculate
+diagnose sys ha showcsum
+diagnose sys ha dump-by vcluster ${haVcluster} ${haGroup}
+${haManageCmd}diagnose sys ha reset-uptime`;
 
   const vpnIp = document.getElementById('vpnIp').value || "<destination_ip>";
   document.getElementById('vpnOut').innerText = `diagnose debug disable
