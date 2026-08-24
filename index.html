@@ -1,248 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FortiGate Toolkit</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FortiGate Toolkit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<nav>
-  <div class="brand"><strong>FortiGate</strong><span>Command Toolkit</span></div>
-
-  <div class="group">
-    <div class="group-label">Diagnostics</div>
-    <div class="nav-item active" data-tab="sniffer">Packet Sniffer</div>
-    <div class="nav-item" data-tab="flow">Debug Flow</div>
-    <div class="nav-item" data-tab="routing">Routing Lookup</div>
-  </div>
-
-  <div class="group">
-    <div class="group-label">Network Tests</div>
-    <div class="nav-item" data-tab="ping">Ping Test</div>
-    <div class="nav-item" data-tab="trace">Traceroute</div>
-  </div>
-
-  <div class="group">
-    <div class="group-label">Link Aggregation</div>
-    <div class="nav-item" data-tab="lacp">LACP Troubleshoot</div>
-  </div>
-
-  <div class="group">
-    <div class="group-label">High Availability</div>
-    <div class="nav-item" data-tab="ha">HA Troubleshoot</div>
-  </div>
-
-  <div class="group">
-    <div class="group-label">VPN &amp; Security</div>
-    <div class="nav-item" data-tab="vpn">VPN IKE Debug</div>
-  </div>
-</nav>
-
-<main>
-  <header>
-    <div>
-      <h1 id="pageTitle">Packet Sniffer</h1>
-      <p id="pageDesc">Capture and analyze network traffic</p>
-    </div>
-    <button class="btn" onclick="clearAllInputs()">Clear all</button>
-  </header>
-
-  <div class="content">
-
-    <!-- SNIFFER -->
-    <div id="sniffer" class="tab active">
-      <div class="card">
-        <h2>Configuration</h2>
-        <div class="grid">
-          <div class="field"><label>Interface</label><input id="snInt" value="any" oninput="genAll()"></div>
-          <div class="field"><label>Verbose level</label>
-            <select id="snVerb" onchange="genAll()">
-              <option value="4" selected>4 — Interface + headers</option>
-              <option value="1">1 — Headers only</option>
-              <option value="3">3 — IPv4 + payload</option>
-              <option value="6">6 — Interface + payload</option>
-            </select>
-          </div>
-          <div class="field"><label>Packet count</label><input type="number" id="snCount" value="0" oninput="genAll()"></div>
-          <div class="field"><label>Timestamp</label>
-            <select id="snTS" onchange="genAll()">
-              <option value="l" selected>Local</option>
-              <option value="a">Absolute</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Filter conditions</h2>
-        <div id="filter-container"></div>
-        <button class="add-row" onclick="addFilterRow()">+ Add condition</button>
-      </div>
-
-      <div class="card">
-        <h2>Command</h2>
-        <div class="code-block" id="snOut" onclick="copy(this)"></div>
-      </div>
+  <nav>
+    <div class="brand">
+      <strong>FortiGate</strong>
+      <span>Command Toolkit</span>
     </div>
 
-    <!-- FLOW -->
-    <div id="flow" class="tab">
-      <div class="card">
-        <h2>Configuration</h2>
-        <div class="grid">
-          <div class="field"><label>Target IP</label><input id="flowAddr" placeholder="192.168.1.1" oninput="genAll()"></div>
-          <div class="field"><label>Protocol</label>
-            <select id="flowProto" onchange="toggleFlowPort(); genAll();">
-              <option value="6" selected>TCP (6)</option>
-              <option value="17">UDP (17)</option>
-              <option value="1">ICMP (1)</option>
-            </select>
-          </div>
-          <div class="field" id="flowPortField"><label>Port</label><input id="flowPort" placeholder="443" oninput="genAll()"></div>
-          <div class="field"><label>Trace count</label><input type="number" id="flowTrace" value="10" oninput="genAll()"></div>
-        </div>
-      </div>
-      <div class="card">
-        <h2>Commands</h2>
-        <div class="code-block" id="flowOut" onclick="copy(this)"></div>
-      </div>
+    <div class="group">
+      <div class="group-label">Diagnostics</div>
+      <div class="nav-item active" data-tab="sniffer">Packet Sniffer</div>
+      <div class="nav-item" data-tab="flow">Debug Flow</div>
+      <div class="nav-item" data-tab="routing">Routing Lookup</div>
     </div>
 
-    <!-- ROUTING -->
-    <div id="routing" class="tab">
-      <div class="card">
-        <h2>Configuration</h2>
-        <div class="grid">
-          <div class="field"><label>Destination IP</label><input id="rtIp" placeholder="192.168.1.0" oninput="genAll()"></div>
-        </div>
-      </div>
-      <div class="card">
-        <h2>Command</h2>
-        <div class="code-block" id="rtOut" onclick="copy(this)"></div>
-      </div>
+    <div class="group">
+      <div class="group-label">Network Tests</div>
+      <div class="nav-item" data-tab="ping">Ping Test</div>
+      <div class="nav-item" data-tab="trace">Traceroute</div>
     </div>
 
-    <!-- PING -->
-    <div id="ping" class="tab">
-      <div class="card">
-        <h2>Configuration</h2>
-        <div class="grid">
-          <div class="field"><label>Source IP</label><input id="pSrc" placeholder="192.168.1.100" oninput="genAll()"></div>
-          <div class="field"><label>Destination IP</label><input id="pDst" placeholder="8.8.8.8" oninput="genAll()"></div>
-        </div>
-      </div>
-      <div class="card">
-        <h2>Command</h2>
-        <div class="code-block" id="pOut" onclick="copy(this)"></div>
-      </div>
+    <div class="group">
+      <div class="group-label">Link Aggregation</div>
+      <div class="nav-item" data-tab="lacp">LACP Troubleshoot</div>
     </div>
 
-    <!-- TRACE -->
-    <div id="trace" class="tab">
-      <div class="card">
-        <h2>Configuration</h2>
-        <div class="grid">
-          <div class="field"><label>Source IP</label><input id="tSrc" placeholder="192.168.1.100" oninput="genAll()"></div>
-          <div class="field"><label>Destination IP</label><input id="tDst" placeholder="8.8.8.8" oninput="genAll()"></div>
-        </div>
-      </div>
-      <div class="card">
-        <h2>Command</h2>
-        <div class="code-block" id="tOut" onclick="copy(this)"></div>
-      </div>
+    <div class="group">
+      <div class="group-label">High Availability</div>
+      <div class="nav-item" data-tab="ha">HA Troubleshoot</div>
     </div>
 
-    <!-- LACP -->
-    <div id="lacp" class="tab">
-      <div class="card">
-        <h2>Aggregate interface</h2>
-        <div class="grid">
-          <div class="field"><label>Interface name</label><input id="lacpIf" placeholder="test_agg1" oninput="genAll()"></div>
-          <div class="field"><label>Disable lacp-ha-slave</label>
-            <select id="lacpHaSlave" onchange="genAll()">
-              <option value="no" selected>No change</option>
-              <option value="yes">Disable</option>
-            </select>
-          </div>
-          <div class="field"><label>Force lacp-mode static</label>
-            <select id="lacpModeStatic" onchange="genAll()">
-              <option value="no" selected>No change</option>
-              <option value="yes">Set static</option>
-            </select>
+    <div class="group">
+      <div class="group-label">VPN &amp; Security</div>
+      <div class="nav-item" data-tab="vpn">VPN IKE Debug</div>
+    </div>
+  </nav>
+
+  <main>
+    <header>
+      <div>
+        <h1 id="pageTitle">Packet Sniffer</h1>
+        <p id="pageDesc">Capture and analyze network traffic</p>
+      </div>
+      <button class="btn" onclick="clearAllInputs()">Clear all</button>
+    </header>
+
+    <div class="content">
+
+      <!-- SNIFFER -->
+      <div id="sniffer" class="tab active">
+        <div class="card">
+          <h2>Configuration</h2>
+          <div class="grid">
+            <div class="field"><label>Interface</label><input id="snInt" value="any" oninput="genAll()"></div>
+            <div class="field"><label>Verbose level</label>
+              <select id="snVerb" onchange="genAll()">
+                <option value="4" selected>4 — Interface + headers</option>
+                <option value="1">1 — Headers only</option>
+                <option value="3">3 — IPv4 + payload</option>
+                <option value="6">6 — Interface + payload</option>
+              </select>
+            </div>
+            <div class="field"><label>Packet count</label><input type="number" id="snCount" value="0" oninput="genAll()"></div>
+            <div class="field"><label>Timestamp</label>
+              <select id="snTS" onchange="genAll()">
+                <option value="l" selected>Local</option>
+                <option value="a">Absolute</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="card">
-        <h2>Commands</h2>
-        <div class="code-block" id="lacpOut" onclick="copy(this)"></div>
-      </div>
+        <div class="card">
+          <h2>Filter conditions</h2>
+          <div id="filter-container"></div>
+          <button class="add-row" onclick="addFilterRow()">+ Add condition</button>
+        </div>
 
-      <div class="card">
-        <h2>LACP flag reference</h2>
-        <p class="ref-note">Flags read left to right: <code>(A|P)(S|F)(A|I)(I|O)(E|D)(E|D)</code></p>
-        <table class="ref-table">
-          <tbody>
-            <tr><td>1</td><td>LACP mode</td><td>A = Active</td><td>P = Passive</td></tr>
-            <tr><td>2</td><td>LACP speed</td><td>S = Slow</td><td>F = Fast</td></tr>
-            <tr><td>3</td><td>Aggregation</td><td>A = Aggregatable</td><td>I = Individual</td></tr>
-            <tr><td>4</td><td>Sync</td><td>I = In sync</td><td>O = Out of sync</td></tr>
-            <tr><td>5</td><td>Frame collection</td><td>E = Enabled</td><td>D = Disabled</td></tr>
-            <tr><td>6</td><td>Frame distribution</td><td>E = Enabled</td><td>D = Disabled</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <h2>Healthy vs. problem states</h2>
-        <table class="ref-table">
-          <thead>
-            <tr><th>State</th><th>Healthy</th><th>Problem</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>LACP state</td><td>established</td><td>negotiating — usually a partner config mismatch</td></tr>
-            <tr><td>MUX state</td><td>COLLECTING_DISTRIBUTING</td><td>WAITING — port isn't passing traffic yet</td></tr>
-          </tbody>
-        </table>
-        <p class="ref-note">If a LAG is unexpectedly down, check <code>min-links</code> against the actual number of active members before assuming a physical link problem.</p>
-      </div>
-    </div>
-
-    <!-- HA -->
-    <div id="ha" class="tab">
-      <div class="card">
-        <h2>Cluster parameters</h2>
-        <div class="grid">
-          <div class="field"><label>VCluster ID</label><input id="haVcluster" value="0" oninput="genAll()"></div>
-          <div class="field"><label>HA group ID</label><input id="haGroup" value="0" oninput="genAll()"></div>
-          <div class="field"><label>Unit ID to manage</label><input id="haUnit" placeholder="1" oninput="genAll()"></div>
+        <div class="card">
+          <h2>Command</h2>
+          <div class="code-block" id="snOut" onclick="copy(this)"></div>
         </div>
       </div>
-      <div class="card">
-        <h2>Commands</h2>
-        <div class="code-block" id="haOut" onclick="copy(this)"></div>
-      </div>
-    </div>
 
-    <!-- VPN -->
-    <div id="vpn" class="tab">
-      <div class="card">
-        <h2>Configuration</h2>
-        <div class="grid">
-          <div class="field"><label>Remote gateway IP</label><input id="vpnIp" placeholder="203.0.113.5" oninput="genAll()"></div>
+      <!-- FLOW -->
+      <div id="flow" class="tab">
+        <div class="card">
+          <h2>Configuration</h2>
+          <div class="grid">
+            <div class="field"><label>Target IP</label><input id="flowAddr" placeholder="192.168.1.1" oninput="genAll()"></div>
+            <div class="field"><label>Protocol</label>
+              <select id="flowProto" onchange="toggleFlowPort(); genAll();">
+                <option value="6" selected>TCP (6)</option>
+                <option value="17">UDP (17)</option>
+                <option value="1">ICMP (1)</option>
+              </select>
+            </div>
+            <div class="field" id="flowPortField"><label>Port</label><input id="flowPort" placeholder="443" oninput="genAll()"></div>
+            <div class="field"><label>Trace count</label><input type="number" id="flowTrace" value="10" oninput="genAll()"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Commands</h2>
+          <div class="code-block" id="flowOut" onclick="copy(this)"></div>
         </div>
       </div>
-      <div class="card">
-        <h2>Commands</h2>
-        <div class="code-block" id="vpnOut" onclick="copy(this)"></div>
+
+      <!-- ROUTING -->
+      <div id="routing" class="tab">
+        <div class="card">
+          <h2>Configuration</h2>
+          <div class="grid">
+            <div class="field"><label>Destination IP</label><input id="rtIp" placeholder="192.168.1.0" oninput="genAll()"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Command</h2>
+          <div class="code-block" id="rtOut" onclick="copy(this)"></div>
+        </div>
       </div>
+
+      <!-- PING -->
+      <div id="ping" class="tab">
+        <div class="card">
+          <h2>Configuration</h2>
+          <div class="grid">
+            <div class="field"><label>Source IP</label><input id="pSrc" placeholder="192.168.1.100" oninput="genAll()"></div>
+            <div class="field"><label>Destination IP</label><input id="pDst" placeholder="8.8.8.8" oninput="genAll()"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Command</h2>
+          <div class="code-block" id="pOut" onclick="copy(this)"></div>
+        </div>
+      </div>
+
+      <!-- TRACE -->
+      <div id="trace" class="tab">
+        <div class="card">
+          <h2>Configuration</h2>
+          <div class="grid">
+            <div class="field"><label>Source IP</label><input id="tSrc" placeholder="192.168.1.100" oninput="genAll()"></div>
+            <div class="field"><label>Destination IP</label><input id="tDst" placeholder="8.8.8.8" oninput="genAll()"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Command</h2>
+          <div class="code-block" id="tOut" onclick="copy(this)"></div>
+        </div>
+      </div>
+
+      <!-- LACP -->
+      <div id="lacp" class="tab">
+        <div class="card">
+          <h2>Aggregate interface</h2>
+          <div class="grid">
+            <div class="field"><label>Interface name</label><input id="lacpIf" placeholder="test_agg1" oninput="genAll()"></div>
+            <div class="field"><label>Disable lacp-ha-slave</label>
+              <select id="lacpHaSlave" onchange="genAll()">
+                <option value="no" selected>No change</option>
+                <option value="yes">Disable</option>
+              </select>
+            </div>
+            <div class="field"><label>Force lacp-mode static</label>
+              <select id="lacpModeStatic" onchange="genAll()">
+                <option value="no" selected>No change</option>
+                <option value="yes">Set static</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Commands</h2>
+          <div class="code-block" id="lacpOut" onclick="copy(this)"></div>
+        </div>
+
+        <div class="card">
+          <h2>LACP flag reference</h2>
+          <p class="ref-note">Flags read left to right: <code>(A|P)(S|F)(A|I)(I|O)(E|D)(E|D)</code></p>
+          <table class="ref-table">
+            <tbody>
+              <tr><td>1</td><td>LACP mode</td><td>A = Active</td><td>P = Passive</td></tr>
+              <tr><td>2</td><td>LACP speed</td><td>S = Slow</td><td>F = Fast</td></tr>
+              <tr><td>3</td><td>Aggregation</td><td>A = Aggregatable</td><td>I = Individual</td></tr>
+              <tr><td>4</td><td>Sync</td><td>I = In sync</td><td>O = Out of sync</td></tr>
+              <tr><td>5</td><td>Frame collection</td><td>E = Enabled</td><td>D = Disabled</td></tr>
+              <tr><td>6</td><td>Frame distribution</td><td>E = Enabled</td><td>D = Disabled</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h2>Healthy vs. problem states</h2>
+          <table class="ref-table">
+            <thead>
+              <tr><th>State</th><th>Healthy</th><th>Problem</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>LACP state</td><td>established</td><td>negotiating — usually a partner config mismatch</td></tr>
+              <tr><td>MUX state</td><td>COLLECTING_DISTRIBUTING</td><td>WAITING — port isn't passing traffic yet</td></tr>
+            </tbody>
+          </table>
+          <p class="ref-note" style="margin-top: 12px; margin-bottom: 0;">If a LAG is unexpectedly down, check <code>min-links</code> against the actual number of active members before assuming a physical link problem.</p>
+        </div>
+      </div>
+
+      <!-- HA -->
+      <div id="ha" class="tab">
+        <div class="card">
+          <h2>Cluster parameters</h2>
+          <div class="grid">
+            <div class="field"><label>VCluster ID</label><input id="haVcluster" value="0" oninput="genAll()"></div>
+            <div class="field"><label>HA group ID</label><input id="haGroup" value="0" oninput="genAll()"></div>
+            <div class="field"><label>Unit ID to manage</label><input id="haUnit" placeholder="1" oninput="genAll()"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Commands</h2>
+          <div class="code-block" id="haOut" onclick="copy(this)"></div>
+        </div>
+      </div>
+
+      <!-- VPN -->
+      <div id="vpn" class="tab">
+        <div class="card">
+          <h2>Configuration</h2>
+          <div class="grid">
+            <div class="field"><label>Remote gateway IP</label><input id="vpnIp" placeholder="203.0.113.5" oninput="genAll()"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Commands</h2>
+          <div class="code-block" id="vpnOut" onclick="copy(this)"></div>
+        </div>
+      </div>
+
     </div>
+  </main>
 
-  </div>
-</main>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
