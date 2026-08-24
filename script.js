@@ -1,5 +1,31 @@
 let rowCount = 0;
 
+// Theme Switch Logic
+const THEME_KEY = "fortigate-toolkit-theme";
+const themeBtn = document.getElementById("themeBtn");
+
+function applyTheme(light) {
+  document.body.classList.toggle("light-theme", light);
+  themeBtn.textContent = light ? "🌙" : "☀️";
+}
+
+function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
+  // Default dark theme (light === false)
+  const light = saved === "light";
+  applyTheme(light);
+}
+
+themeBtn.addEventListener("click", function () {
+  const light = !document.body.classList.contains("light-theme");
+  applyTheme(light);
+  try { localStorage.setItem(THEME_KEY, light ? "light" : "dark"); } catch (e) {}
+});
+
+initTheme();
+
+// App Logic
 const tabConfig = {
   sniffer: { title: 'Packet Sniffer', desc: 'Capture and analyze network traffic' },
   flow:    { title: 'Debug Flow', desc: 'Trace packet flow through the system' },
