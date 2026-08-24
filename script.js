@@ -1,29 +1,43 @@
 let rowCount = 0;
 
-// Theme Switch Logic
-const THEME_KEY = "fortigate-toolkit-theme";
-const themeBtn = document.getElementById("themeBtn");
+// Theme Toggle Logic
+const THEME_KEY = "fg_theme_pref";
 
-function applyTheme(light) {
-  document.body.classList.toggle("light-theme", light);
-  themeBtn.textContent = light ? "🌙" : "☀️";
+function applyTheme(isDark) {
+  if (isDark) {
+    document.body.classList.add("dark-theme");
+  } else {
+    document.body.classList.remove("dark-theme");
+  }
+  const btn = document.getElementById("themeBtn");
+  if (btn) {
+    btn.textContent = isDark ? "☀️" : "🌙";
+  }
 }
 
 function initTheme() {
-  let saved = null;
-  try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
-  // Default dark theme (light === false)
-  const light = saved === "light";
-  applyTheme(light);
+  let saved = localStorage.getItem(THEME_KEY);
+  // Default to dark mode unless 'light' is explicitly saved
+  const isDark = saved !== "light";
+  applyTheme(isDark);
 }
 
-themeBtn.addEventListener("click", function () {
-  const light = !document.body.classList.contains("light-theme");
-  applyTheme(light);
-  try { localStorage.setItem(THEME_KEY, light ? "light" : "dark"); } catch (e) {}
-});
+document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
 
-initTheme();
+  const themeBtn = document.getElementById("themeBtn");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      const isDarkNow = document.body.classList.contains("dark-theme");
+      const nextDarkState = !isDarkNow;
+      applyTheme(nextDarkState);
+      localStorage.setItem(THEME_KEY, nextDarkState ? "dark" : "light");
+    });
+  }
+
+  addFilterRow();
+  genAll();
+});
 
 // App Logic
 const tabConfig = {
@@ -54,6 +68,8 @@ function switchTab(tabName, el) {
 function addFilterRow() {
   rowCount++;
   const container = document.getElementById('filter-container');
+  if (!container) return;
+  
   const row = document.createElement('div');
   row.className = 'filter-row';
   row.id = `row-${rowCount}`;
@@ -97,6 +113,7 @@ function addFilterRow() {
 
 function toggleRowFields(rowId) {
   const row = document.getElementById(rowId);
+  if (!row) return;
   const type = row.querySelector('.fType').value;
   row.querySelector('.fProtoField').style.display = (type === 'port') ? 'flex' : 'none';
   const valField = row.querySelector('.fVal').parentElement;
@@ -104,7 +121,8 @@ function toggleRowFields(rowId) {
 }
 
 function removeRow(id) {
-  document.getElementById(id).remove();
+  const elem = document.getElementById(id);
+  if (elem) elem.remove();
   genAll();
 }
 
@@ -121,7 +139,8 @@ function clearAllInputs() {
     else input.value = '';
   });
   document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-  document.getElementById('filter-container').innerHTML = '';
+  const container = document.getElementById('filter-container');
+  if (container) container.innerHTML = '';
   rowCount = 0;
   addFilterRow();
   toggleFlowPort();
@@ -129,7 +148,10 @@ function clearAllInputs() {
 }
 
 function genAll() {
-  const sInt = document.getElementById('snInt').value || "any";
+  const snIntEl = document.getElementById('snInt');
+  if (!snIntEl) return;
+
+  const sInt = snIntEl.value || "any";
   const sVerb = document.getElementById('snVerb').value;
   const sCount = document.getElementById('snCount').value || "0";
   const sTS = document.getElementById('snTS').value;
@@ -222,6 +244,3 @@ function copy(el) {
   el.classList.add('copied');
   setTimeout(() => el.classList.remove('copied'), 900);
 }
-
-addFilterRow();
-genAll();
